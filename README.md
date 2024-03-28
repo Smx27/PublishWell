@@ -59,7 +59,7 @@ We welcome contributions from the academic publishing community! Please refer to
 
 **License:**
 
-PublishWell is licensed under the [**MIT**] [license-url]. By contributing to this project, you agree to the terms of the license.
+PublishWell is licensed under the [**MIT**][license-url]. By contributing to this project, you agree to the terms of the license.
 
 **Stay Updated**
 
