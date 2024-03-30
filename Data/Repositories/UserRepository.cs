@@ -1,3 +1,4 @@
+using AutoMapper;
 using JPS.Data.Entities;
 using JPS.Interfaces;
 
@@ -12,14 +13,17 @@ namespace JPS.Data.Repositories
         /// Database context used for accessing user data.
         /// </summary>
         public DataContext _context { get; }
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class with a specified data context.
         /// </summary>
         /// <param name="context">The data context to use for data access.</param>
-        public UserRepository(DataContext context)
+        /// <param name="mapper"></param>
+        public UserRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -27,9 +31,9 @@ namespace JPS.Data.Repositories
         /// </summary>
         /// <param name="userID">The unique identifier of the user.</param>
         /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
-        public Task<AppUser> GetUserByID(int userID)
+        public async Task<AppUser> GetUserByID(int userID)
         {
-            throw new NotImplementedException();
+            return await _context.Users.FindAsync(userID);
         }
 
         /// <summary>

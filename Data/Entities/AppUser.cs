@@ -20,6 +20,6 @@ namespace JPS.Data.Entities
         /// Roles for user
         /// </summary>
         /// <value></value>
-        public ICollection<AppUserRole>? UserRoles { get; set; }
+        public ICollection<AppUserRole> UserRoles { get; set; }
     }
 }

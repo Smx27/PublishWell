@@ -1,4 +1,6 @@
 using JPS.Data;
+using JPS.Interfaces;
+using JPS.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace JPS.Extension
@@ -22,6 +24,16 @@ namespace JPS.Extension
                 opt.UseSqlite(config.GetConnectionString("SqliteCS"));
             });
             //TODO: add CORS
+            service.AddCors(o=> o.AddPolicy(name: "CORS" , builder=> {
+                builder.AllowAnyHeader()
+                .AllowAnyOrigin()
+                .AllowAnyMethod();
+            }));
+
+            //adding automapper
+            service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //Added token service 
+            service.AddScoped<ITokenService, TokenService>();
             return service;
         }
     }
