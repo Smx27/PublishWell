@@ -54,6 +54,8 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+//Added cors
+app.UseCors("CORS");
 
 app.UseHttpsRedirection();
 
@@ -62,20 +64,20 @@ app.UseAuthorization();
 app.MapControllers();
 
 //Seeding default Data
-using var scope = app.Services.CreateScope();
-var service = scope.ServiceProvider;
-try
-{
-    var context = service.GetRequiredService<DataContext>();
-    var userManager = service.GetRequiredService<UserManager<AppUser>>();
-    var roleManager = service.GetRequiredService<RoleManager<AppRole>>();
-    await context.Database.MigrateAsync();
-    await SeedData.SeedUsers(userManager, roleManager);
-}
-catch(Exception ex)
-{
-    var logger  = service.GetService<ILogger<Program>>();
-    logger.LogError(ex,"An error occur while seeding data/ Migration");
-}
+// using var scope = app.Services.CreateScope();
+// var service = scope.ServiceProvider;
+// try
+// {
+//     var context = service.GetRequiredService<DataContext>();
+//     var userManager = service.GetRequiredService<UserManager<AppUser>>();
+//     var roleManager = service.GetRequiredService<RoleManager<AppRole>>();
+//     await context.Database.MigrateAsync();
+//     await SeedData.SeedUsers(userManager, roleManager);
+// }
+// catch(Exception ex)
+// {
+//     var logger  = service.GetService<ILogger<Program>>();
+//     logger.LogError(ex,"An error occur while seeding data/ Migration");
+// }
 
 app.Run();
