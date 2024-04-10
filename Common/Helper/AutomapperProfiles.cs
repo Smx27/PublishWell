@@ -1,4 +1,7 @@
 using AutoMapper;
+using JPS.Data.Entities;
+using PublishWell.Controllers.Authentication.DTO;
+using PublishWell.Controllers.Users.DTO;
 
 namespace JPS.Common.Helper
 {
@@ -12,7 +15,9 @@ namespace JPS.Common.Helper
         /// </summary>
         public AutomapperProfiles()
         {
-            // Add your AutoMapper mapping configurations here
+            CreateMap<AppUser, RegisterDTO>().ReverseMap();
+            CreateMap<AppUser, UserDataDTO>().ReverseMap();
+
         }
     }
 }

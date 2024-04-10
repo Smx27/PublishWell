@@ -39,7 +39,24 @@ cd PublishWell
 dotnet restore
 ```
 
-4. **Run the application:** (Instructions will be added once development is further along)
+4. **Run the application:** 
+- If database not exist getting some error on db 
+```bash 
+dotnet ef database update
+```
+- If dotnet ef not exist 
+```bash
+dotnet tool install --global dotnet-ef
+```
+- To run the application 
+```bash
+dotnet run
+``` 
+
+- To run the application in debug mode with logs 
+```bash
+dotnet watch
+```
 
 **Developing**
 

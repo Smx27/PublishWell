@@ -30,10 +30,10 @@ namespace JPS.Extension
                 .AllowAnyMethod();
             }));
 
-            //adding automapper
-            service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             //Added token service 
             service.AddScoped<ITokenService, TokenService>();
+            //adding automapper
+            service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             return service;
         }
     }

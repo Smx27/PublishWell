@@ -1,9 +1,4 @@
-using JPS.Data;
-using JPS.Data.Entities;
-using JPS.Data.Seeder;
 using JPS.Extension;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.ApplicationService(builder.Configuration);
 
 // Added Identity Services through Extension class
-
+builder.Services.IdentityServices(builder.Configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 //Added Swagger 

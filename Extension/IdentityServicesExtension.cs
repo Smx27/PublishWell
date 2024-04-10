@@ -24,9 +24,9 @@ namespace JPS.Extension
             services.AddIdentityCore<AppUser>(opt=>{
                 opt.Password.RequireNonAlphanumeric = false;
             })
-            .AddUserManager<UserManager<AppUser>>()
             .AddRoles<AppRole>()
             .AddRoleManager<RoleManager<AppRole>>()
+            .AddSignInManager()
             .AddEntityFrameworkStores<DataContext>();
             //Barrier config
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

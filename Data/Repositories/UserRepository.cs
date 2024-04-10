@@ -1,6 +1,9 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using JPS.Data.Entities;
 using JPS.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using PublishWell.Controllers.Users.DTO;
 
 namespace JPS.Data.Repositories
 {
@@ -30,30 +33,91 @@ namespace JPS.Data.Repositories
         /// Gets a user by their ID asynchronously.
         /// </summary>
         /// <param name="userID">The unique identifier of the user.</param>
-        /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
-        public async Task<AppUser> GetUserByID(int userID)
+        /// <returns>A task that resolves to an `UserDataDTO` object representing the retrieved user, or null if not found.</returns>
+        public async Task<UserDataDTO> GetUserByID(int userID)
         {
-            return await _context.Users.FindAsync(userID);
+            return _mapper.Map<UserDataDTO>(await _context.Users.FindAsync(userID));    
         }
 
         /// <summary>
         /// Gets a user by their username asynchronously, but this method has a potential typo in its name and parameter.
         /// </summary>
-        /// <param name="userID">The username of the user (likely a typo, should be string name instead of int userID).</param>
+        /// <param name="userName">The username of the user (likely a typo, should be string name instead of int userID).</param>
         /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
-        public Task<AppUser> GetUserByName(int userID)  // Potential typo: Consider renaming to GetUserByName(string name)
+        public async Task<UserDataDTO> GetUserByName(string userName)  
         {
-            throw new NotImplementedException();
+            return await _context.Users
+                .Where(u => u.UserName == userName)
+                .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
         }
 
         /// <summary>
         /// Gets a user by their email address asynchronously, but this method has a potential typo in its name and parameter.
         /// </summary>
-        /// <param name="userID">The email address of the user (likely a typo, should be string email instead of int userID).</param>
+        /// <param name="email">The email address of the user (likely a typo, should be string email instead of int userID).</param>
         /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
-        public Task<AppUser> GetUserByEmail(int userID)  // Potential typo: Consider renaming to GetUserByEmail(string email)
+        public async Task<UserDataDTO> GetUserByEmail(string email) 
         {
-            throw new NotImplementedException();
+            return await _context.Users
+                .Where(u => u.UserName == email)
+                .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
+        /// <summary>
+        /// Update userdata 
+        /// </summary>
+        /// <param name="userdata"></param>
+        public async void Update(UserDataDTO userdata)
+        {
+            var user = await _context.Users.Where(u=> u.UserName == userdata.UserName).SingleOrDefaultAsync();
+            if (user != null)
+            {
+                _mapper.Map(userdata, user);
+
+                _context.Entry(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("User not found");
+            }
+            
+        }
+        /// <summary>
+        /// Create a new user
+        /// </summary>
+        /// <param name="user"></param>
+        public async void Create(UserDataDTO user)
+        {
+            if(user != null)
+            {
+                _context.Users.Add(_mapper.Map<AppUser>(user));
+            }
+            await _context.SaveChangesAsync();
+        }
+        /// <summary>
+        /// Delete user from database
+        /// </summary>
+        /// <param name="userID"></param>        
+        public void Delete(int userID)
+        {
+            _context.Users.Where(u=> u.Id == userID)
+            .SingleOrDefault().IsDeleted = true;
+            _context.SaveChanges();
+        }
+        /// <summary>
+        /// Check if user exist
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        public bool IsExist(int userID)
+        {
+            var user = _context.Users.Find(userID);
+            if (user != null)
+                return true;
+            else
+                return false;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace PublishWell.Controllers.Authentication.DTO
         /// Username of user the user 
         /// </summary>
         /// <value>Username of the user</value>
-        [DefaultValue("TestUser")]
+        [DefaultValue("TestUser1")]
         public string UserName { get; set; }
         /// <summary>
         /// Password of the user

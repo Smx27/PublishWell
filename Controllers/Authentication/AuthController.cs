@@ -18,7 +18,8 @@ namespace JPS.Controllers.Authentication
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
         private readonly RoleManager<AppRole> _roleManager;
-        
+        private readonly SignInManager<AppUser> _signInManager;
+
 
         /// <summary>
         /// Constructor to handle all the data initialization
@@ -27,14 +28,21 @@ namespace JPS.Controllers.Authentication
         /// <param name="tokenService"></param>
         /// <param name="mapper"></param>
         /// <param name="roleManager"></param>
-        public AuthController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper, RoleManager<AppRole> roleManager)
+        /// <param name="signInManager"></param>
+        public AuthController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager)
         {
             _roleManager = roleManager;
+            _signInManager = signInManager;
             _userManager = userManager;
             _tokenService = tokenService;
             _mapper = mapper;
             
         }
+        /// <summary>
+        /// Api endpoint to register a new user into the system
+        /// </summary>
+        /// <param name="register"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO register)
         {
@@ -80,7 +88,6 @@ namespace JPS.Controllers.Authentication
             .SingleOrDefaultAsync(u=> u.UserName.ToLower() == login.UserName.ToLower());
 
             if(user == null) return Unauthorized();
-
             var result = await _userManager.CheckPasswordAsync(user, login.Password);
 
             if(!result) return Unauthorized("Invalid Password");
