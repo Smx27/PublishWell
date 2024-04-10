@@ -1,4 +1,3 @@
-using JPS.Data.Entities;
 using PublishWell.Controllers.Users.DTO;
 
 namespace JPS.Interfaces

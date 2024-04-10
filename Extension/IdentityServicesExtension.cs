@@ -27,6 +27,7 @@ namespace JPS.Extension
             .AddRoles<AppRole>()
             .AddRoleManager<RoleManager<AppRole>>()
             .AddSignInManager()
+            .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider)
             .AddEntityFrameworkStores<DataContext>();
             //Barrier config
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

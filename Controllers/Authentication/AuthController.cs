@@ -1,4 +1,5 @@
 using AutoMapper;
+using JPS.Common;
 using JPS.Data.Entities;
 using JPS.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -29,7 +30,9 @@ namespace JPS.Controllers.Authentication
         /// <param name="mapper"></param>
         /// <param name="roleManager"></param>
         /// <param name="signInManager"></param>
-        public AuthController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager)
+        public AuthController(UserManager<AppUser> userManager, ITokenService tokenService, 
+        IMapper mapper, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager
+        )
         {
             _roleManager = roleManager;
             _signInManager = signInManager;
@@ -97,6 +100,66 @@ namespace JPS.Controllers.Authentication
                 Token = await _tokenService.CreateToken(user),
                 Email = user.Email
             };
+        }
+        
+        /// <summary>
+        /// Action to rest password of a user  
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>User DTO</returns>
+        [HttpPost("forgetPassword")]
+        public async Task<ActionResult<UserDTO>> ForgetPassword(ForgetPasswordDTO model)
+        {
+            //Getting the user 
+            var user = getUserForPasswordrReset(model);
+            if(user != null)
+            {
+                IdentityResult passwordChangeResult = await _userManager.ResetPasswordAsync(user, model.ResetToken, model.NewPassword);
+                if(passwordChangeResult.Succeeded) return Ok(_mapper.Map <UserDTO>(user));
+                if(passwordChangeResult.Errors.Any()) return BadRequest(passwordChangeResult.Errors);
+            }
+            return null;
+
+        }
+
+        /// <summary>
+        /// Generate Password reset token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>Forget Password reset token</returns>
+        [HttpPost("generateResetToken")]
+        public async Task<ActionResult<ForgetPasswordDTO>> GenerateResetToken(ForgetPasswordDTO model)
+        {
+            //Getting the user 
+            var user = getUserForPasswordrReset(model);
+            if(user != null)
+            {
+                model.ResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            }
+            //Now sending the model for demo Mail service will be added later
+            return Ok(model);
+        }
+
+        /// <summary>
+        /// Get user for Forgot password reset
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>AppUser object if user exists else null</returns>
+        private AppUser getUserForPasswordrReset(ForgetPasswordDTO model)
+        {
+            if(Utilities.IsNotNullOrEmpty(model.Id))
+            {
+                return _userManager.FindByIdAsync(model.Id).Result;
+            }
+            else if(Utilities.IsNotNullOrEmpty(model.Email))
+            {
+                return _userManager.FindByEmailAsync(model.Email).Result;            
+            }
+            else if (Utilities.IsNotNullOrEmpty(model.UserName))
+            {
+                return _userManager.FindByNameAsync(model.UserName).Result;
+            }
+            return null;
         }
         /// <summary>
         /// Method To check is user exist in DB 

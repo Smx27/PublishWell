@@ -7,6 +7,9 @@ namespace JPS.Data.Entities
     /// </summary>
     public class AppRole: IdentityRole<int>
     {
+        /// <summary>
+        /// Navigation property for Users roles
+        /// </summary>
         public ICollection<AppUserRole> UserRoles { get; set; }
     }
 }
