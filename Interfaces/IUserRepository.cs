@@ -8,6 +8,11 @@ namespace JPS.Interfaces
     public interface IUserRepository
     {
         /// <summary>
+        /// Gets all users asynchronously.
+        /// </summary>
+        /// <returns>A task that resolves to a list of `AppUser` objects representing all retrieved users.</returns>
+        Task<List<UserDataDTO>> GetAllUsers();
+        /// <summary>
         /// Gets a user by their ID asynchronously.
         /// </summary>
         /// <param name="userID">The unique identifier of the user.</param>
@@ -32,19 +37,19 @@ namespace JPS.Interfaces
         /// Update user object
         /// </summary>
         /// <param name="userData"></param>
-        void Update(UserDataDTO userData);
+        Task UpdateAsync(UserDataDTO userData);
 
         /// <summary>
         /// Create User Data
         /// </summary>
         /// <param name="user"></param>
-        void Create(UserDataDTO user);
+        Task CreateAsync(UserDataDTO user);
 
         /// <summary>
         /// Delete User Data
         /// </summary>
         /// <param name="userID"></param>
-        void Delete(int userID );
+        Task DeleteAsync(int userID );
         /// <summary>
         /// Check if the user exist or not
         /// </summary>

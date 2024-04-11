@@ -40,6 +40,19 @@ namespace JPS.Data.Repositories
         }
 
         /// <summary>
+        /// Gets all users asynchronously.
+        /// </summary>
+        /// <returns>A task that resolves to a list of `AppUser` objects representing all retrieved users.</returns>
+        public async Task<List<UserDataDTO>> GetAllUsers()
+        {
+            var users = await _context.Users
+                .Where(u=> !u.IsDeleted)
+                .OrderBy(u => u.Id)
+                .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            return users;
+        }
+        /// <summary>
         /// Gets a user by their username asynchronously, but this method has a potential typo in its name and parameter.
         /// </summary>
         /// <param name="userName">The username of the user (likely a typo, should be string name instead of int userID).</param>
@@ -68,7 +81,7 @@ namespace JPS.Data.Repositories
         /// Update userdata 
         /// </summary>
         /// <param name="userdata"></param>
-        public async void Update(UserDataDTO userdata)
+        public async Task UpdateAsync(UserDataDTO userdata)
         {
             var user = await _context.Users.Where(u=> u.UserName == userdata.UserName).SingleOrDefaultAsync();
             if (user != null)
@@ -88,11 +101,11 @@ namespace JPS.Data.Repositories
         /// Create a new user
         /// </summary>
         /// <param name="user"></param>
-        public async void Create(UserDataDTO user)
+        public async Task CreateAsync(UserDataDTO user)
         {
             if(user != null)
             {
-                _context.Users.Add(_mapper.Map<AppUser>(user));
+                await _context.Users.AddAsync(_mapper.Map<AppUser>(user));
             }
             await _context.SaveChangesAsync();
         }
@@ -100,11 +113,12 @@ namespace JPS.Data.Repositories
         /// Delete user from database
         /// </summary>
         /// <param name="userID"></param>        
-        public void Delete(int userID)
+        public Task DeleteAsync(int userID)
         {
             _context.Users.Where(u=> u.Id == userID)
             .SingleOrDefault().IsDeleted = true;
             _context.SaveChanges();
+            return Task.CompletedTask;
         }
         /// <summary>
         /// Check if user exist

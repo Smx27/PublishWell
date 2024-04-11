@@ -1,7 +1,10 @@
 using JPS.Data;
+using JPS.Data.Repositories;
 using JPS.Interfaces;
 using JPS.Services;
 using Microsoft.EntityFrameworkCore;
+using PublishWell.Data.Repositories;
+using PublishWell.Interfaces;
 
 namespace JPS.Extension
 {
@@ -32,6 +35,10 @@ namespace JPS.Extension
 
             //Added token service 
             service.AddScoped<ITokenService, TokenService>();
+            //Adding exception log repo
+            service.AddScoped<IExceptionLogRepository, ExceptionLogRepository>();
+            //Adding UserRepository 
+            service.AddScoped<IUserRepository, UserRepository>();
             //adding automapper
             service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             return service;

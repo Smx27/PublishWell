@@ -1,4 +1,5 @@
-using JPS.Data.Entities;
+using PublishWell.Data.Entities;
+using PublishWell.Data.Enums;
 
 namespace PublishWell.Controllers.Users.DTO;
 
@@ -7,12 +8,6 @@ namespace PublishWell.Controllers.Users.DTO;
 /// </summary>
 public class UserDataDTO
 {
-    /// <summary>
-    /// The user's unique identifier.
-    /// </summary>
-    /// <value>1</value>
-    public int Id { get; set; }
-
     /// <summary>
     /// The user's first name.
     /// </summary>
@@ -42,22 +37,11 @@ public class UserDataDTO
     public string LastName { get; set; }
 
     /// <summary>
-    /// The user's email address.
-    /// </summary>
-    /// <value>john.doe@example.com</value>
-    public string Email { get; set; }
-
-    /// <summary>
-    /// The user's phone number.
-    /// </summary>
-    /// <value>123-456-7890</value>
-    public string PhoneNumber { get; set; }
-
-    /// <summary>
     /// The user's photo URL.
     /// </summary>
     /// <value>https://www.example.com/profile-photo.jpg</value>
     public string PhotoUrl { get; set; }
+
     /// <summary>
     /// The date and time the user was created.
     /// </summary>
@@ -67,10 +51,44 @@ public class UserDataDTO
     /// The date and time the user was last active.
     /// </summary>
     public DateTime LastActive { get; set; } = DateTime.UtcNow;
+
     /// <summary>
-    /// Roles for user
+    /// (Optional) The user's website URL.
     /// </summary>
-    /// <value></value>
-    public ICollection<AppUserRole> UserRoles { get; set; }
+    public string Website { get; set; }
+
+    /// <summary>
+    /// (Optional) The user's location (city, country). Consider privacy implications before storing.
+    /// </summary>
+    public string Location { get; set; }
+
+    /// <summary>
+    /// (Optional) A short biography of the user.
+    /// </summary>
+    public string Bio { get; set; }
+
+    // Social Information (consider privacy implications and potential misuse)
+    /// <summary>
+    /// (Optional) A dictionary or string containing links to the user's social media profiles.
+    /// </summary>
+    public SocialMediaLinks SocialMediaLinks { get; set; }
+
+    // Preferences
+    /// <summary>
+    /// (Optional) The user's preferred language for the application interface.
+    /// </summary>
+    public string PreferredLanguage { get; set; }
+
+    /// <summary>
+    /// A flag indicating whether the user wants to receive notifications.
+    /// </summary>
+    public bool NotificationsEnabled { get; set; } = true;  
+
+    // Advanced Preferences (consider complexity and potential for future changes)
+    /// <summary>
+    /// (Optional) The user's preferred theme for the application interface (e.g., light, dark).
+    /// </summary>
+    public Theme Theme { get; set; }
+
 
 }

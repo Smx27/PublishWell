@@ -3,6 +3,7 @@ using System;
 using JPS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JPS.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240411072045_UserAndPublications")]
+    partial class UserAndPublications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -127,12 +130,6 @@ namespace JPS.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PreferredLanguage")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")

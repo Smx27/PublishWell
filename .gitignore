@@ -49,3 +49,5 @@ _ReSharper*/
 /bin
 /obj
 JPS.db
+JPS.db-shm
+JPS.db-wal

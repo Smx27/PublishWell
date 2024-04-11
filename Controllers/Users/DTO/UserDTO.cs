@@ -14,7 +14,20 @@ namespace PublishWell.Controllers.Users.DTO
         /// Token of the user
         /// </summary>
         /// <value>SampleJwtToken</value>
-        public string Token { get; set; }
+        public string JWTToken { get; set; }
+
+        /// <summary>
+        /// Refresh token of the user
+        /// </summary>
+        /// <value>Some RandomlyGenerated hashed string</value>
+        public string RefreshToken { get; set; }
+
+        /// <summary>
+        /// Refresh token expiry date
+        /// </summary>
+        /// <value>Token expiry date</value>
+        public DateTime RefreshTokenExpires { get; set; }
+        
         /// <summary>
         /// Email of the user
         /// </summary>

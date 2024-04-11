@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using JPS.Middleware.ExceptionDTO;
+using PublishWell.Interfaces;
 
 namespace API.Middleware
 {
@@ -30,17 +31,18 @@ namespace API.Middleware
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger,
                                     IHostEnvironment env)
         {
-            this._env = env;
-            this._logger = logger;
-            this._next = next;
+            _env = env;
+            _logger = logger;
+            _next = next;
         }
 
         /// <summary>
         /// Invokes the middleware asynchronously. Catches exceptions, logs them, and returns a JSON error response.
         /// </summary>
         /// <param name="context">The current HTTP context.</param>
+        /// <param name="log">The exception log repository.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IExceptionLogRepository log)
         {
             try
             {
@@ -49,6 +51,7 @@ namespace API.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                log.LogException(ex);
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

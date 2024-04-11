@@ -1,4 +1,10 @@
+using API.Middleware;
+using JPS.Data;
+using JPS.Data.Entities;
+using JPS.Data.Seeder;
 using JPS.Extension;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,10 +40,32 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://github.com/Smx27/PublishWell/blob/master/LICENSE.txt")
         }
     });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement{
+        {
+            new OpenApiSecurityScheme{
+                Reference = new OpenApiReference{
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
 });
 
 
 var app = builder.Build();
+//Adding exception Middleware
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,20 +87,20 @@ app.UseAuthorization();
 app.MapControllers();
 
 //Seeding default Data
-// using var scope = app.Services.CreateScope();
-// var service = scope.ServiceProvider;
-// try
-// {
-//     var context = service.GetRequiredService<DataContext>();
-//     var userManager = service.GetRequiredService<UserManager<AppUser>>();
-//     var roleManager = service.GetRequiredService<RoleManager<AppRole>>();
-//     await context.Database.MigrateAsync();
-//     await SeedData.SeedUsers(userManager, roleManager);
-// }
-// catch(Exception ex)
-// {
-//     var logger  = service.GetService<ILogger<Program>>();
-//     logger.LogError(ex,"An error occur while seeding data/ Migration");
-// }
+using var scope = app.Services.CreateScope();
+var service = scope.ServiceProvider;
+try
+{
+    var context = service.GetRequiredService<DataContext>();
+    var userManager = service.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = service.GetRequiredService<RoleManager<AppRole>>();
+    await context.Database.MigrateAsync();
+    await SeedData.SeedUsers(userManager, roleManager);
+}
+catch(Exception ex)
+{
+    var logger  = service.GetService<ILogger<Program>>();
+    logger.LogError(ex,"An error occur while seeding data/ Migration");
+}
 
 app.Run();

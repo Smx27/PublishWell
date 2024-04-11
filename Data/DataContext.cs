@@ -2,6 +2,7 @@ using JPS.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PublishWell.Data.Entities;
 
 namespace JPS.Data
 {
@@ -19,7 +20,11 @@ namespace JPS.Data
         /// <param name="options"></param>
         /// <returns></returns>
         public DataContext(DbContextOptions options) : base(options){}
-
+        
+        /// <summary>
+        /// Exception Log Table which will store all the exceptions
+        /// </summary>
+        public DbSet<ExceptionLog> ExceptionLogs { get; set; }
         /// <summary>
         /// The OnModelCreating function is used to configure the relationships and constraints between
         /// entities in the database model.

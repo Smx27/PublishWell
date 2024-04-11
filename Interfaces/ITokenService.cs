@@ -18,5 +18,14 @@ namespace JPS.Interfaces
         /// The method is returning a JWT token as a string.
         /// </returns>
         Task<string> CreateToken(AppUser user);
+        
+        /// <summary>
+        /// This function creates a JWT refresh token for authentication in an API using a user's username as a
+        /// claim.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>Jwt refresh token as a string</returns>
+        Task<string> CreateRefreshToken(AppUser user);
+
     }
 }

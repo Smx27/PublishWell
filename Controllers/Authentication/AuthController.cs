@@ -49,18 +49,6 @@ namespace JPS.Controllers.Authentication
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO register)
         {
-            if(! await _roleManager.Roles.AnyAsync())
-            {
-                var roles = new List<AppRole>{
-                    new AppRole{Name = "Member"},
-                    new AppRole{Name = "Admin"},
-                    new AppRole{Name = "Moderator"},
-                    };
-                foreach (var role in roles)
-                {
-                    await _roleManager.CreateAsync(role);
-                }
-            }
             if(await UserExist(register.Username)) return BadRequest("Username Taken");
 
             var user = _mapper.Map<AppUser>(register);
@@ -73,12 +61,42 @@ namespace JPS.Controllers.Authentication
 
             if(!roleResult.Succeeded) return BadRequest(roleResult.Errors);
 
-            return new UserDTO{
+            return new UserDTO
+            {
                 Email = user.Email,
                 UserName = user.UserName,
-                Token = await _tokenService.CreateToken(user)
+                JWTToken = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
+                RefreshTokenExpires = DateTime.Now.AddDays(7)
             };
         }
+
+        /// <summary>
+        /// Regenerate user tokens for auth user
+        /// </summary>
+        /// <param name="refresh"></param>
+        /// <returns> UserDataDTO</returns>
+        [HttpPost("refresh")]
+        public async Task<ActionResult<UserDTO>> Refresh(RefreshTokenDTO refresh)
+        {
+            if(string.IsNullOrEmpty(refresh.RefreshToken) || string.IsNullOrEmpty(refresh.UserName)) return BadRequest("Invalid Request");
+            var result = await ValidateRefreshToken(refresh.RefreshToken,refresh.UserName);
+            if(!result) return BadRequest("Invalid Refresh Token");
+            var user = await _userManager.FindByNameAsync(refresh.UserName);
+            var userDTO = new UserDTO
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                JWTToken = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
+                RefreshTokenExpires = DateTime.Now.AddDays(7)
+            };
+
+            await SaveRefreshToken(_userManager, userDTO.RefreshToken, refresh.UserName, userDTO.RefreshTokenExpires);
+
+            return userDTO;
+        }
+
         /// <summary>
         /// Api endpoint to login into the system
         /// </summary>
@@ -94,14 +112,29 @@ namespace JPS.Controllers.Authentication
             var result = await _userManager.CheckPasswordAsync(user, login.Password);
 
             if(!result) return Unauthorized("Invalid Password");
-
-            return new UserDTO{
+            
+            var userDTO = new UserDTO
+            {
                 UserName = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                Email = user.Email
+                Email = user.Email,
+                JWTToken = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
+                RefreshTokenExpires = DateTime.Now.AddDays(7)
             };
+
+            await SaveRefreshToken(_userManager,userDTO.RefreshToken, user.UserName, userDTO.RefreshTokenExpires);
+            return userDTO;
         }
         
+        private static async Task SaveRefreshToken(UserManager<AppUser> userManager, string refreshToken, string userName, DateTime expiresAt)
+        {
+            var users = await userManager.FindByNameAsync(userName);
+            if(users == null) return;
+            users.RefreshToken = refreshToken;
+            users.RefreshTokenExpiryTime = expiresAt;
+            await userManager.UpdateAsync(users);
+        }
+
         /// <summary>
         /// Action to rest password of a user  
         /// </summary>
@@ -169,6 +202,27 @@ namespace JPS.Controllers.Authentication
         private async Task<bool> UserExist(string username)
         {
             return await _userManager.Users.AnyAsync(u=> u.UserName == username.ToLower());
+        }
+
+        /// <summary>
+        /// Check refresh Token Of the user
+        /// </summary>
+        /// <param name="RefreshToken"></param>
+        /// <param name="Username"></param>
+        /// <returns>Return True/False</returns>
+        private async Task<bool> ValidateRefreshToken(string RefreshToken, string Username)
+        {
+            var user = await _userManager.Users
+            .Where(u=> u.UserName == Username)
+            .SingleOrDefaultAsync();
+
+            if(user == null) return false;
+
+            user.RefreshToken.Equals(RefreshToken);
+
+            if(user.RefreshTokenExpiryTime < DateTime.Now) return false;
+
+            return true;
         }
     }
 }
