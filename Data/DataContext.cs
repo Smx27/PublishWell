@@ -25,6 +25,15 @@ namespace JPS.Data
         /// Exception Log Table which will store all the exceptions
         /// </summary>
         public DbSet<ExceptionLog> ExceptionLogs { get; set; }
+
+        /// <summary>
+        /// Mail Template Table which will store all the mail templates
+        /// </summary>
+        public DbSet<MailTemplate> MailTemplates { get; set; }
+        /// <summary>
+        /// Mail Template type Table which will store all the mail templates Types.
+        /// </summary>
+        public DbSet<MailTemplateType> MailTemplateTypes { get; set; }
         /// <summary>
         /// The OnModelCreating function is used to configure the relationships and constraints between
         /// entities in the database model.
@@ -48,6 +57,10 @@ namespace JPS.Data
             .WithOne(u=> u.Role)
             .HasForeignKey(ur=> ur.RoleId)
             .IsRequired();
+
+            builder.Entity<MailTemplateType>()
+            .HasMany(mt=> mt.Template)
+            .WithOne(mtt=> mtt.Type);
         }
     }
 }

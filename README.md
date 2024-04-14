@@ -1,4 +1,4 @@
-## PublishWell: A Streamlined Journal Publishing Platform
+# PublishWell: A Streamlined Journal Publishing Platform
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -57,6 +57,20 @@ dotnet run
 ```bash
 dotnet watch
 ```
+5. **Developement Setup**
+### **Local MailServer Configuration**
+if you are developing and need the mail to work just user docker 
+run docker and I user `MailSlurper` for mail you can use anything 
+- To run this using docker 
+```bash
+docker run -it -p 2500:2500 -p 8080:8080 -p 8085:8085 --rm marcopas/docker-mailslurper            
+```
+- This whould be running on `localhost:8080`
+- To test if it is working or not 
+```bash 
+wget -qO- https://raw.githubusercontent.com/sedkodes/mailslurper/main/send-mail-test.py | python3
+```
+
 
 **Developing**
 

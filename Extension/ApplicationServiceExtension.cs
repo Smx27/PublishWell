@@ -3,6 +3,7 @@ using JPS.Data.Repositories;
 using JPS.Interfaces;
 using JPS.Services;
 using Microsoft.EntityFrameworkCore;
+using PublishWell.Common.Helper;
 using PublishWell.Data.Repositories;
 using PublishWell.Interfaces;
 
@@ -39,8 +40,21 @@ namespace JPS.Extension
             service.AddScoped<IExceptionLogRepository, ExceptionLogRepository>();
             //Adding UserRepository 
             service.AddScoped<IUserRepository, UserRepository>();
+            // Adding Mail repository
+            service.AddScoped<IMailRepository, MailRepository>();
+            //Adding unit of work
+            service.AddScoped<IUnitOfWork, UnitOfWork>();
+            // Adding Email Service 
+            service.AddScoped<IEmailService, EmailService>();
             //adding automapper
             service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //Adding Email service
+            // service.AddFluentEmail("info@sp.com")
+            //     .AddSmtpSender("localhost", 2500);
+            //Adding SMTP Setup class 
+            service.Configure<SmtpSetup>(config.GetSection("SmtpSetup"));
+
+
             return service;
         }
     }
