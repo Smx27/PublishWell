@@ -46,6 +46,8 @@ namespace JPS.Extension
             service.AddScoped<IUnitOfWork, UnitOfWork>();
             // Adding Email Service 
             service.AddScoped<IEmailService, EmailService>();
+            // Adding Publication Repository
+            service.AddScoped<IPublicationsRepository, PublicationRepository>();
             //adding automapper
             service.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             //Adding Email service
@@ -53,6 +55,8 @@ namespace JPS.Extension
             //     .AddSmtpSender("localhost", 2500);
             //Adding SMTP Setup class 
             service.Configure<SmtpSetup>(config.GetSection("SmtpSetup"));
+            //Adding ApplicationInformation
+            service.Configure<AppInfo>(config.GetSection("AppDeploymentInfo"));
 
 
             return service;

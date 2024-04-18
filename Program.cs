@@ -20,6 +20,7 @@ builder.Services.ApplicationService(builder.Configuration);
 builder.Services.IdentityServices(builder.Configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.WebHost.UseKestrel();
 //Added Swagger 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -79,7 +80,6 @@ if (app.Environment.IsDevelopment())
 }
 //Added cors
 app.UseCors("CORS");
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

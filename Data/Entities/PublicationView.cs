@@ -18,14 +18,9 @@ namespace PublishWell.Data.Entities
         public int PublicationId { get; set; }
 
         /// <summary>
-        /// Number of views for the publication.
-        /// </summary>
-        public int ViewCount { get; set; }
-
-        /// <summary>
         /// Date and time of the last view.
         /// </summary>
-        public DateTime LastViewDate { get; set; }
+        public DateTime LastViewDate { get; set; } = DateTime.Now;
 
         /// <summary>
         /// Navigation property to the publication.
@@ -35,6 +30,6 @@ namespace PublishWell.Data.Entities
         /// <summary>
         /// Navigation property to the users who have viewed the publication.
         /// </summary>
-        public ICollection<AppUser> Viewers { get; set; }
+        public AppUser Viewer { get; set; }
     }
 }

@@ -14,5 +14,17 @@ namespace JPS.Common
         {
             return !string.IsNullOrEmpty(s);
         }
+
+        /// <summary>
+        /// Extension method for IFormFile to check if the file type is allowed
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns>Bool: if the file type is allowed</returns>
+        public static bool IsAllowedContentType(this IFormFile file)
+        {
+            var allowedExtensions = new List<string> { ".pdf", ".docx", ".xlsx", ".csv" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            return allowedExtensions.Contains(extension);
+        }
     }
 }

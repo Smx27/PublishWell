@@ -23,6 +23,10 @@ namespace PublishWell.Interfaces
         /// Provides access to the IExceptionLogRepository instance for exception logging operations.
         /// </summary>
         public IExceptionLogRepository exceptionLogRepository { get; }
+        /// <summary>
+        /// Provides access to the publicationRepository instance for exception logging operations.
+        /// </summary>
+        public IPublicationsRepository publicationsRepository { get; }
 
         /// <summary>
         /// Commits all changes made through the repositories exposed by this UnitOfWork instance

@@ -1,5 +1,4 @@
 using PublishWell.Controllers.Mail.DTO;
-using PublishWell.Data.Entities;
 
 namespace PublishWell.Interfaces;
 

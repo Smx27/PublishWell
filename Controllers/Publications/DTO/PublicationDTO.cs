@@ -1,14 +1,33 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using JPS.Data.Entities;
+using PublishWell.Data.Entities;
 using PublishWell.Data.Enums;
 
-namespace PublishWell.Data.Entities;
+namespace PublishWell.Controllers.Publications.DTO;
 
 /// <summary>
-/// Represents a published work of content within the PublishWell system.
+/// Publication data transfar object which will be used by api to transfer data
 /// </summary>
-public class Publication
+public class PublicationDTO
 {
+    /// <summary>
+    /// (Optional) The number of comments left on this publication.
+    /// </summary>
+    public int CommentCount { get; set; }
+    /// <summary>
+    /// (Optional) The number of times this publication has been viewed.
+    /// </summary>
+    public int ViewCount { get; set; }
+
+    /// <summary>
+    /// (Optional) The number of likes this publication has received.
+    /// </summary>
+    public int LikeCount { get; set; }
+
+    /// <summary>
+    /// Id of the viewer who is viewing this publication.
+    /// </summary>
+    public int ViewerID { get; set; }
     /// <summary>
     /// The unique identifier for the publication.
     /// </summary>
@@ -21,64 +40,40 @@ public class Publication
     [MinLength(5)]
     [MaxLength(10000)]
     [DataType(DataType.Text)]
+    [DefaultValue("Test Publication title")]
     public string PublicationName { get; set; }
-
     /// <summary>
     /// A description of the publication content.
     /// </summary>
+    [Required(ErrorMessage = "Publication Description is required.")]
+    [MinLength(5)]
+    [MaxLength(10000)]
+    [DataType(DataType.Text)]
+    [DefaultValue("This is a test publication to testoout the api if that is working or not.")]
     public string PublicationDescription { get; set; }
-
     /// <summary>
     /// (Optional) A URL or path to an image representing the publication.
     /// </summary>
     public string PublicationImage { get; set; }
-
     /// <summary>
     /// The date and time the publication was created.
     /// </summary>
     public DateTime PublicationDate { get; set; }
-    
-    /// <summary>
-    /// The date and time the data was created.
-    /// </summary>
-    public DateTime Created { get; set; }
-
     /// <summary>
     /// The foreign key representing the author of the publication (linked to the AppUser table).
     /// </summary>
     public int PublicationAuthorId { get; set; }
-
     /// <summary>
-    /// Navigation property representing the author of the publication (AppUser object).
+    /// Collection of PublicationTag objects associated with this publication. this sould be a ',' seperated string.
     /// </summary>
-    public AppUser PublicationAuthor { get; set; }
-    
-    //TODO: Impliment Publication Tags
-
-    /// <summary>
-    /// Collection of PublicationTag objects associated with this publication.
-    /// </summary>
-    public ICollection<PublicationTag> PublicationTags { get; set; }
-
-    /// <summary>
-    /// Collection of PublicationLike objects representing users who liked this publication. 
-    /// </summary>
-    public ICollection<PublicationLike> PublicationLikes { get; set; }
-
-    /// <summary>
-    /// Collection of PublicationComment objects representing comments left on this publication.
-    /// </summary>
-    public ICollection<PublicationComment> PublicationComments { get; set; }
-
-    /// <summary>
-    /// Collection of PublicationView objects representing users who viewed this publication.
-    /// </summary>
-    public ICollection<PublicationView> PublicationViews { get; set; }
+    [DefaultValue("test, test1, test again, something new")]
+    public string Tags { get; set; }
 
     /// <summary>
     /// (Optional) The category of the publication (e.g., article, blog post, news item).
     /// </summary>
-    public PublicationCategorie PublicationCategory { get; set; }
+    [DefaultValue(3)]
+    public int CategoryID { get; set; }
 
     /// <summary>
     /// The content of the publication.
@@ -87,26 +82,26 @@ public class Publication
     [MaxLength(Int32.MaxValue)]
     [DataType(DataType.Html)]
     [Required(ErrorMessage = "Publication content is required.")]
+    [DefaultValue(@"Missing Mapping Configuration: There might be missing configuration for mapping the PublicationTags property between PublicationDTO and Publication.
+Property Mismatch: The structure of PublicationTags in PublicationDTO might not match the corresponding property in Publication. This could be a difference in data types, presence of nested objects, etc.")]
     public string PublicationContent { get; set; }
-    
+
     /// <summary>
     /// (Optional) The status of the publication (e.g., active, inactive, deleted).
     /// </summary>
+    [DefaultValue(PublicationStatus.Draft)]
     public PublicationStatus Status { get; set; } = PublicationStatus.Draft;
-
     /// <summary>
     /// (Optional) The date and time the publication was last updated.
     /// </summary>
     public DateTime LastUpdatedDate { get; set; } = DateTime.Now;
-    
+
     /// <summary>
     /// The number of Edits this publication has received.
     /// </summary>
     public int EditCount { get; set; }
-
     /// <summary>
-    /// A publication must contains one or multiple documnets of reserch files 
+    /// Any documnet attached into the publications will be availlable here
     /// </summary>
-    public ICollection<string> AttachedDocumets { get; set; }
-
+    public List<string> AttachedDocuments { get; set; }
 }

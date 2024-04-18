@@ -70,8 +70,37 @@ docker run -it -p 2500:2500 -p 8080:8080 -p 8085:8085 --rm marcopas/docker-mails
 ```bash 
 wget -qO- https://raw.githubusercontent.com/sedkodes/mailslurper/main/send-mail-test.py | python3
 ```
-
-
+### **Setting up Https**
+Setting up https in windows is fairely easy but doing this in ubuntu/linux is very hactic. To handle that we are using `[mkcerts][mkcert-url]` github repo. Huge thanks to them.
+- For windows 
+```bash
+dotnet tools install -g dev-certs
+dotnet dev-certs  https --trust
+```
+thats all for windows we can have https on our end. 
+- For ubuntu/linux
+Follow the mkcert install process on the repo. Navigate to the SSL folder and remove the old [`pem`](./SSL/) files. and follow up the next comments.   
+```bash
+cd SSL
+mkcert -install
+mkcert "localhost"
+```
+This will generate `pem` files and now you have to change the [`appsettings.Development.json`](./appsettings.Development.json)
+```json
+{
+"Kestrel": {
+   "Endpoints": {
+      "Https": {
+         "Url": "https://localhost:5000",
+         "Certificate": {
+            "Path": "./SSL/{add the new pem filename}",
+            "KeyPath":"./SSL/{add the key file}"
+            }
+         }
+      }
+   }
+}
+``` 
 **Developing**
 
 1. **Code Style:** We follow a consistent code style to improve readability and maintainability. Specific guidelines will be added in a separate document (e.g., `.editorconfig` or a dedicated style guide document).
@@ -147,3 +176,4 @@ Use this space to list resources you find helpful and would like to give credit 
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
+[mkcert-url]: https://github.com/mkcerts 

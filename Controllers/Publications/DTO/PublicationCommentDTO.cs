@@ -1,11 +1,9 @@
-using JPS.Data.Entities;
-
-namespace PublishWell.Data.Entities;
+namespace PublishWell.Controllers.Publications.DTO;
 
 /// <summary>
-/// This is the table which will contains the publications comments for each publication.
+/// Data transfar object publication comment.
 /// </summary>
-public class PublicationComment
+public class PublicationCommentDTO
 {
 
     /// <summary>
@@ -19,11 +17,6 @@ public class PublicationComment
     public int PublicationID { get; set; }
 
     /// <summary>
-    /// Navigation property to the publication.
-    /// </summary>
-    public Publication Publication { get; set; }
-
-    /// <summary>
     /// The comment text.
     /// </summary>
     public string Comment { get; set; }
@@ -31,7 +24,7 @@ public class PublicationComment
     /// <summary>
     /// The date and time the comment was created.
     /// </summary>
-    public DateTime Created { get; set; } 
+    public DateTime Created { get; set; }
 
     /// <summary>
     /// The date and time the comment was last updated.
@@ -49,7 +42,7 @@ public class PublicationComment
     public int UserID { get; set; }
 
     /// <summary>
-    /// Navigation property to the user who created the comment.
+    /// User name of the commented user.
     /// </summary>
-    public AppUser User { get; set; }
+    public string UserName { get; set; }
 }

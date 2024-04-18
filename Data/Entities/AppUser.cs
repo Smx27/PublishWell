@@ -85,7 +85,7 @@ public class AppUser : IdentityUser<int>
     /// <summary>
     /// A flag indicating whether the user wants to receive notifications.
     /// </summary>
-    public bool NotificationsEnabled { get; set; } = true;  
+    public bool NotificationsEnabled { get; set; } = true;
 
     // Advanced Preferences (consider complexity and potential for future changes)
     /// <summary>
@@ -120,6 +120,13 @@ public class AppUser : IdentityUser<int>
     public DateTime RefreshTokenExpiryTime { get; set; }
 
     // Relationships (implement as needed)
+
+    /// <summary>
+    /// Users Publications 
+    /// </summary>
+    /// <value></value>
+    public ICollection<Publication> Publications { get; set; }
+
     /// <summary>
     /// Collection of posts created by the user (one-to-many relationship with Post entity).
     /// </summary>

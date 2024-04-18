@@ -3,6 +3,7 @@ using JPS.Data;
 using JPS.Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace JPS.Extension
@@ -62,6 +63,9 @@ namespace JPS.Extension
                 opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 opt.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin","Moderate"));
             });
+
+            //adding httpcontext accessor
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             return services;
         }
     }

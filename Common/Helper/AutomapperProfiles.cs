@@ -2,6 +2,7 @@ using AutoMapper;
 using JPS.Data.Entities;
 using PublishWell.Controllers.Authentication.DTO;
 using PublishWell.Controllers.Mail.DTO;
+using PublishWell.Controllers.Publications.DTO;
 using PublishWell.Controllers.Users.DTO;
 using PublishWell.Data.Entities;
 
@@ -25,6 +26,15 @@ namespace JPS.Common.Helper
                 .ForMember(d=> d.TemplateTypeName, opt => opt.MapFrom(src=> src.Type.Name));
             CreateMap<MailDTO, MailTemplate>();
             CreateMap<MailTemplateType, TemplateTypeDTO>().ReverseMap();
+            // Publication mapping 
+            CreateMap<Publication, PublicationDTO>()
+                .ForMember(d=> d.ViewCount , opt=> opt.MapFrom(src=> src.PublicationViews.Count))
+                .ForMember(d=> d.LikeCount , opt=> opt.MapFrom(src=> src.PublicationLikes.Count))
+                .ForMember(d=> d.CommentCount , opt=> opt.MapFrom(src=> src.PublicationComments.Count));
+            CreateMap<PublicationDTO, Publication>();
+
+            CreateMap<PublicationComment, CommentDTO>().ReverseMap();
+            CreateMap<Categorie, CategorieDTO>().ReverseMap();
 
         }
     }

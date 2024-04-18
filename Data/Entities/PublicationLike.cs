@@ -1,29 +1,44 @@
+using JPS.Data.Entities;
+
 namespace PublishWell.Data.Entities;
 
 /// <summary>
-/// Publication like table which will count the likes of the publication.
+/// This class represents a record of a user liking a publication.
 /// </summary>
 public class PublicationLike
-{   
-
+{
     /// <summary>
-    /// Publication like id
+    /// Unique identifier for this PublicationLike record.
     /// </summary>
     public int PublicationLikeId { get; set; }
 
     /// <summary>
-    /// Publication id
+    /// Foreign key referencing the Publication this like is associated with.
     /// </summary>
     public int PublicationId { get; set; }
 
     /// <summary>
-    /// Appuser id
+    /// Navigation property referencing the Publication this like is associated with.
     /// </summary>
-    public int AppUserId { get; set; }
+    public Publication Publication { get; set; }
     
     /// <summary>
-    /// Publication like date
+    /// Foreign key referencing the AppUser who liked the publication.
     /// </summary>
-    public DateTime PublicationLikeDate { get; set; }
+    public int AppUserId { get; set; }
 
+    /// <summary>
+    /// Navigation property referencing the AppUser who liked the publication.
+    /// </summary>
+    public AppUser User { get; set; }
+
+    /// <summary>
+    /// Date and time the like was recorded.
+    /// </summary>
+    public DateTime LikedAt { get; set; }
+
+    /// <summary>
+    /// Flag indicating whether this like record has been marked as deleted (soft deletion).
+    /// </summary>
+    public bool IsDeleted { get; set; } = false;
 }

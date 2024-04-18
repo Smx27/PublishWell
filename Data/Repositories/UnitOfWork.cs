@@ -18,16 +18,19 @@ namespace PublishWell.Data.Repositories
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _http;
 
         /// <summary>
         /// Injecting the repository into the unit of work constructor.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="mapper"></param>
-        public UnitOfWork(DataContext context, IMapper mapper)
+        /// <param name="http"></param>
+        public UnitOfWork(DataContext context, IMapper mapper, IHttpContextAccessor http)
         {
             _context = context;
             _mapper = mapper;
+            _http = http;
         }
 
         /// <summary>
@@ -48,6 +51,12 @@ namespace PublishWell.Data.Repositories
         /// (Consider if AutoMapper mapping is needed for exception logging)
         /// </summary>
         public IExceptionLogRepository exceptionLogRepository => new ExceptionLogRepository(_context);
+
+        /// <summary>
+        ///  Provides access to the IPublicationsRepository instance.
+        /// </summary>
+        /// <returns>publicationsRepository object</returns>
+        public IPublicationsRepository publicationsRepository => new PublicationRepository(_context, _mapper, _http);
 
         /// <summary>
         /// Commits all changes made through the repositories exposed by this UnitOfWork instance

@@ -3,7 +3,6 @@ using System.Net.Mail;
 using FluentEmail.Core;
 using FluentEmail.Smtp;
 using Fluid;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Options;
 using PublishWell.Common.Helper;
 using PublishWell.Interfaces;
