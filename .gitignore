@@ -52,3 +52,4 @@ API/JPS.db
 API/JPS.db-shm
 API/JPS.db-wal
 UI/.vscode
+UI/dist
