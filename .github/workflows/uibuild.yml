@@ -1,0 +1,32 @@
+name: Angular Build Pipeline
+
+on:
+  push:
+    paths:
+      - UI/**
+  pull_request:
+    branches: [ "dev" ,"master"] 
+defaults:
+  run:
+    working-directory: UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.12.2]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: './UI/package-lock.json'
+      - name: Install dependencies
+        run: npm i --force
+      - name: Running Build
+        run: npm run build --if-present

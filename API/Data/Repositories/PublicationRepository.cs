@@ -1,8 +1,11 @@
+using System.Text.Json;
+using API.Extension;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using JPS.Common;
 using JPS.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using PublishWell.API.Common.Helper;
 using PublishWell.API.Controllers.Publications.DTO;
 using PublishWell.API.Data.Entities;
@@ -12,33 +15,36 @@ using PublishWell.API.Interfaces;
 
 namespace PublishWell.API.Data.Repositories
 {
-    /// <summary>
-    /// Publication respository to handle publications related db operations.
-    /// </summary>
-    public class PublicationRepository : IPublicationsRepository
+    	/// <summary>
+	/// Publication respository to handle publications related db operations.
+	/// </summary>
+	public class PublicationRepository : IPublicationsRepository
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _http;
+        private readonly IDistributedCache _cache;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PublicationRepository"/> class.
-        /// </summary>
-        /// <param name="context">The database context.</param>
-        /// <param name="mapper">The mapper.</param>
-        /// <param name="http"></param>
-        public PublicationRepository(DataContext context, IMapper mapper, IHttpContextAccessor http)
-        {
-            _context = context;
-            _mapper = mapper;
-            _http = http;
-        }
-        /// <summary>
-        /// Adding new publications into db table.
-        /// </summary>
-        /// <param name="pub">data transfar object of publication</param>
-        /// <returns>Publications DTO object.</returns>
-        public async Task AddAsync(PublicationDTO pub)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PublicationRepository"/> class.
+		/// </summary>
+		/// <param name="context">The database context.</param>
+		/// <param name="mapper">The mapper.</param>
+		/// <param name="http"></param>
+		/// <param name="cache"></param>
+		public PublicationRepository(DataContext context, IMapper mapper, IHttpContextAccessor http, IDistributedCache cache)
+		{
+			_context = context;
+			_mapper = mapper;
+			_http = http;
+			_cache = cache;
+		}
+		/// <summary>
+		/// Adding new publications into db table.
+		/// </summary>
+		/// <param name="pub">data transfar object of publication</param>
+		/// <returns>Publications DTO object.</returns>
+		public async Task AddAsync(PublicationDTO pub)
         {
             var categorie = await _context.Categories
             .Where(c=> c.Id == pub.CategoryID)
@@ -106,65 +112,88 @@ namespace PublishWell.API.Data.Repositories
         /// <param name="filter"></param>
         /// <returns>Publications DTO object.</returns>
         public async Task<PagedList<PublicationDTO>> GetAllByFilter(PublicationsFilter filter)
+		{
+			string recordID = GetRecordID<PublicationsFilter>(filter);
+
+			var data = await _cache.GetRecordsAsync<PagedList<PublicationDTO>>(recordID);
+
+			if (data != null) return data;
+
+			var query = _context.Publications.AsQueryable();
+			// Removing the Draft and deleted publications
+			query = query.Where(p => p.Status != PublicationStatus.Deleted && p.Status != PublicationStatus.Draft);
+
+			// Finter By status 
+			if (filter.Status != null)
+			{
+				query = query.Where(p => p.Status == filter.Status);
+			}
+
+			// filter by categories
+			if (Utilities.IsNotNullOrEmpty(filter.PublicationCategorieName))
+			{
+				// query = query.Where(p => p.PublicationCategory?.Categorie?.Name == filter.PublicationCategorieName ?? false);
+			}
+
+			// Filter by start date and end date
+			if (filter.StartDate != null && filter.EndDate != null)
+			{
+				query = query.Where(p => p.PublicationDate >= filter.StartDate && p.PublicationDate <= filter.EndDate);
+			}
+
+			// Filter by author id 
+			// if(filter.AuthorID > 0)
+			{
+				query = query.Where(p => p.PublicationAuthor.Id == filter.AuthorID);
+			}
+
+			// filter by auther name
+			if (Utilities.IsNotNullOrEmpty(filter.AuthorName))
+			{
+				query = query.Where(p => p.PublicationAuthor.UserName.ToLower() == filter.AuthorName.ToLower());
+				//p.PublicationAuthor.FirstName.Contains(filter.AuthorName) || p.PublicationAuthor.LastName.Contains(filter.AuthorName));
+			}
+
+			//TODO: Add most Popular and least popular filters
+			query = filter.FilterBy switch
+			{
+				FilterByEnum.Newest => query.OrderByDescending(c => c.Created),
+				FilterByEnum.Oldest => query.OrderBy(c => c.Created),
+				_ => query.OrderByDescending(c => c.Created)
+			};
+
+			var result = await PagedList<PublicationDTO>.CreateAsync(
+			query.AsNoTracking()
+			.ProjectTo<PublicationDTO>(_mapper.ConfigurationProvider),
+			filter.PageNumber,
+			filter.PageSize);
+
+			// Setting Data into cache
+			await _cache.SetRecordsAsync<PagedList<PublicationDTO>>(recordID, result);
+
+			return result;
+		}
+
+		private static string GetRecordID<T>(T filter)
+		{
+			return "publications_" + DateTime.Now.ToString("yyyyMMdd_hhmm") + JsonSerializer.Serialize(filter);
+		}
+
+		/// <summary>
+		/// Get publication by id from db table.
+		/// </summary>
+		/// <param name="publicationId"></param>
+		/// <param name="viewerID"></param>
+		/// <returns>Publication object.</returns>
+		public async Task<Publication> GetById(int publicationId, int viewerID)
         {
-            var query = _context.Publications.AsQueryable();
-            // Removing the Draft and deleted publications
-            query = query.Where(p => p.Status != PublicationStatus.Deleted && p.Status != PublicationStatus.Draft);
+            string recordID = GetRecordID<string>($"{publicationId}, {viewerID}");
+			
+            var data = await _cache.GetRecordsAsync<Publication>(recordID);
+			
+            if (data != null) return data;
 
-            // Finter By status 
-            if (filter.Status != null)
-            {
-                query = query.Where(p => p.Status == filter.Status);
-            }
-
-            // filter by categories
-            if (Utilities.IsNotNullOrEmpty(filter.PublicationCategorieName))
-            {
-                // query = query.Where(p => p.PublicationCategory?.Categorie?.Name == filter.PublicationCategorieName ?? false);
-            }
-
-            // Filter by start date and end date
-            if (filter.StartDate != null && filter.EndDate != null)
-            {
-                query = query.Where(p => p.PublicationDate >= filter.StartDate && p.PublicationDate <= filter.EndDate);
-            }
-
-            // Filter by author id 
-            // if(filter.AuthorID > 0)
-            {
-                query = query.Where(p => p.PublicationAuthor.Id == filter.AuthorID);
-            }
-
-            // filter by auther name
-            if (Utilities.IsNotNullOrEmpty(filter.AuthorName))
-            {
-                query = query.Where(p => p.PublicationAuthor.UserName.ToLower() == filter.AuthorName.ToLower());
-                //p.PublicationAuthor.FirstName.Contains(filter.AuthorName) || p.PublicationAuthor.LastName.Contains(filter.AuthorName));
-            }
-
-            //TODO: Add most Popular and least popular filters
-            query = filter.FilterBy switch
-            {
-                FilterByEnum.Newest => query.OrderByDescending(c => c.Created),
-                FilterByEnum.Oldest => query.OrderBy(c => c.Created),
-                _ => query.OrderByDescending(c => c.Created)
-            };
-
-            return await PagedList<PublicationDTO>.CreateAsync(
-            query.AsNoTracking()
-            .ProjectTo<PublicationDTO>(_mapper.ConfigurationProvider),
-            filter.PageNumber,
-            filter.PageSize);
-        }
-        /// <summary>
-        /// Get publication by id from db table.
-        /// </summary>
-        /// <param name="publicationId"></param>
-        /// <param name="viewerID"></param>
-        /// <returns>Publication object.</returns>
-        public async Task<Publication> GetById(int publicationId, int viewerID)
-        {
-            if (publicationId <= 0) throw new ArgumentException("Invalid publication id");
+			if (publicationId <= 0) throw new ArgumentException("Invalid publication id");
             var publication = await _context.Publications
             .Include(p => p.PublicationComments)
             .Include(p => p.PublicationLikes)
@@ -175,6 +204,8 @@ namespace PublishWell.API.Data.Repositories
 
             if (publication.PublicationAuthorId != viewerID)
                 await UpdateView(publication, viewerID);
+            //Updating the cache
+            await _cache.SetRecordsAsync<Publication>(recordID, data);
             //Update the view count
             return (publication != null) ?
                     publication :
@@ -273,7 +304,13 @@ namespace PublishWell.API.Data.Repositories
         /// <returns>List of Publication Comments</returns>
         public async Task<PagedList<PublicationCommentDTO>> GetCommentsAsync(PublicationCommentFilter filter)
         {
-            var query = _context.Publications.Where(p => p.Id == filter.PublicationID)
+			string recordID = GetRecordID<PublicationCommentFilter>(filter);
+
+			var data = await _cache.GetRecordsAsync<PagedList<PublicationCommentDTO>>(recordID);
+
+			if (data != null) return data;
+
+			var query = _context.Publications.Where(p => p.Id == filter.PublicationID)
                 .SelectMany(p => p.PublicationComments).AsQueryable();
 
             //TODO: Add most Popular and least popular filters
@@ -282,13 +319,19 @@ namespace PublishWell.API.Data.Repositories
                 FilterByEnum.Newest => query.OrderByDescending(c => c.Created),
                 FilterByEnum.Oldest => query.OrderBy(c => c.Created),
                 _ => query.OrderByDescending(c => c.Created)
-            };
+			};
 
-            return await PagedList<PublicationCommentDTO>.CreateAsync(
+
+			data = await PagedList<PublicationCommentDTO>.CreateAsync(
             query.AsNoTracking()
             .ProjectTo<PublicationCommentDTO>(_mapper.ConfigurationProvider),
             filter.PageNumber,
             filter.PageSize);
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<PagedList<PublicationCommentDTO>>(recordID, data);
+
+            return data;
         }
 
         /// <summary>
@@ -337,9 +380,20 @@ namespace PublishWell.API.Data.Repositories
         /// </returns>
         public async Task<CategorieDTO> GetCategorieByID(int id)
         {
-            return await _context.Categories.Where(c => c.Id == id)
+			string recordID = GetRecordID<string>($"get_Categorie:{id}");
+
+			var data = await _cache.GetRecordsAsync<CategorieDTO>(recordID);
+
+			if (data != null) return data;
+
+			data = await _context.Categories.Where(c => c.Id == id)
                         .ProjectTo<CategorieDTO>(_mapper.ConfigurationProvider)
                         .SingleOrDefaultAsync();
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<CategorieDTO>(recordID, data);
+
+			return data;
         }
 
         /// <summary>
@@ -389,9 +443,19 @@ namespace PublishWell.API.Data.Repositories
         /// </returns>
         public async Task<IEnumerable<CategorieDTO>> GetAllCategorie()
         {
-            return await _context.Categories
+			string recordID = GetRecordID<string>($"GetAllCategorie");
+
+			var data = await _cache.GetRecordsAsync<IEnumerable<CategorieDTO>>(recordID);
+
+			if (data != null) return data;
+			data = await _context.Categories
                         .ProjectTo<CategorieDTO>(_mapper.ConfigurationProvider)
                         .ToListAsync();
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<IEnumerable<CategorieDTO>>(recordID, data);
+
+			return data;
         }
 
 
@@ -411,4 +475,5 @@ namespace PublishWell.API.Data.Repositories
             return await _context.Categories.AnyAsync(c => c.Id == id);
         }
     }
+
 }

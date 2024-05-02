@@ -1,9 +1,12 @@
+using API.Extension;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using JPS.Data.Entities;
 using JPS.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using PublishWell.API.Controllers.Users.DTO;
+using System.Text.Json;
 
 namespace JPS.Data.Repositories
 {
@@ -17,24 +20,30 @@ namespace JPS.Data.Repositories
         /// </summary>
         public DataContext _context { get; }
         private readonly IMapper _mapper;
+        private readonly IDistributedCache _cache;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserRepository"/> class with a specified data context.
-        /// </summary>
-        /// <param name="context">The data context to use for data access.</param>
-        /// <param name="mapper"></param>
-        public UserRepository(DataContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        /// <summary>
-        /// Gets a user by their ID asynchronously.
-        /// </summary>
-        /// <param name="userID">The unique identifier of the user.</param>
-        /// <returns>A task that resolves to an `UserDataDTO` object representing the retrieved user, or null if not found.</returns>
-        public async Task<UserDataDTO> GetUserByID(int userID)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UserRepository"/> class with a specified data context.
+		/// </summary>
+		/// <param name="context">The data context to use for data access.</param>
+		/// <param name="mapper"></param>
+		/// <param name="cache"></param>
+		public UserRepository(DataContext context, IMapper mapper, IDistributedCache cache)
+		{
+			_context = context;
+			_mapper = mapper;
+			_cache = cache;
+		}
+		private static string GetRecordID<T>(T filter)
+		{
+			return "users_" + DateTime.Now.ToString("yyyyMMdd_hhmm") + JsonSerializer.Serialize(filter);
+		}
+		/// <summary>
+		/// Gets a user by their ID asynchronously.
+		/// </summary>
+		/// <param name="userID">The unique identifier of the user.</param>
+		/// <returns>A task that resolves to an `UserDataDTO` object representing the retrieved user, or null if not found.</returns>
+		public async Task<UserDataDTO> GetUserByID(int userID)
         {
             return _mapper.Map<UserDataDTO>(await _context.Users.FindAsync(userID));    
         }
@@ -45,12 +54,22 @@ namespace JPS.Data.Repositories
         /// <returns>A task that resolves to a list of `AppUser` objects representing all retrieved users.</returns>
         public async Task<List<UserDataDTO>> GetAllUsers()
         {
-            var users = await _context.Users
+			string recordID = GetRecordID<string>($"GetAllUsers");
+
+			var data = await _cache.GetRecordsAsync<List<UserDataDTO>>(recordID);
+
+            if (data != null) return data;
+
+			var users = await _context.Users
                 .Where(u=> !u.IsDeleted)
                 .OrderBy(u => u.Id)
                 .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            return users;
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<List<UserDataDTO>>(recordID, users);
+
+			return users;
         }
         /// <summary>
         /// Gets a user by their username asynchronously, but this method has a potential typo in its name and parameter.
@@ -59,11 +78,22 @@ namespace JPS.Data.Repositories
         /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
         public async Task<UserDataDTO> GetUserByName(string userName)  
         {
-            return await _context.Users
+			string recordID = GetRecordID<string>($"GetUserByName:{userName}");
+
+			var data = await _cache.GetRecordsAsync<UserDataDTO>(recordID);
+
+			if (data != null) return data;
+
+			data = await _context.Users
                 .Where(u => u.UserName == userName)
                 .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
-        }
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<UserDataDTO>(recordID, data);
+
+            return data;
+		}
 
         /// <summary>
         /// Gets a user by their email address asynchronously, but this method has a potential typo in its name and parameter.
@@ -72,10 +102,22 @@ namespace JPS.Data.Repositories
         /// <returns>A task that resolves to an `AppUser` object representing the retrieved user, or null if not found.</returns>
         public async Task<UserDataDTO> GetUserByEmail(string email) 
         {
-            return await _context.Users
+			string recordID = GetRecordID<string>($"GetUserByEmail:{email}");
+
+			var data = await _cache.GetRecordsAsync<UserDataDTO>(recordID);
+
+			if (data != null) return data;
+
+			data = await _context.Users
                 .Where(u => u.UserName == email)
                 .ProjectTo<UserDataDTO>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
+			
+
+			//Updating the cache
+			await _cache.SetRecordsAsync<UserDataDTO>(recordID, data);
+
+			return data;
         }
         /// <summary>
         /// Update userdata 

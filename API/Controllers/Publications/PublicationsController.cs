@@ -3,6 +3,7 @@ using JPS.Common;
 using JPS.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Options;
 using PublishWell.API.Common.Helper;
 using PublishWell.API.Controllers.Publications.DTO;

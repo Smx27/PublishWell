@@ -8,3 +8,8 @@ and to replace this
 ```regex
 sample.API.$1
 ```
+This is the command to set a specific node version as default using nvm 
+
+```bash
+nvm alias default 20.12.2
+```

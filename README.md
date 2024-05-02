@@ -101,6 +101,39 @@ This will generate `pem` files and now you have to change the [`appsettings.Deve
    }
 }
 ``` 
+### **Setup Redis locally using Docker**
+To run Redis you can use the simple use their client to do that but we used the docker way to do that. Here is a command to run Redis using docker.
+But before that you need the docker desktop client. Next 
+```bash
+docker run --name name-of-the-instance -p 6379:6379 -d redis
+```
+This should create a running instance of Redis in your local, if you want to check the what are the running containners.
+Here is the command for that - 
+```bash 
+docker ps -a
+```
+To interact with Redis-cli Here is the commands 
+```bash
+docker exec -it name-of-the-instance sh
+```
+Then write this command 
+```bash
+redis-cli
+```
+To check if the Redis working well or not we have some commands
+```bash
+#To ping the redis db
+ping
+# to check the records
+select 0
+#To check the db size
+dbsize
+# To scan the if there are some data
+scan 0
+# get get the data for a key
+hgetall key
+```
+
 **Developing**
 
 1. **Code Style:** We follow a consistent code style to improve readability and maintainability. Specific guidelines will be added in a separate document (e.g., `.editorconfig` or a dedicated style guide document).

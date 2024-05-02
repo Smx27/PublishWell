@@ -8,7 +8,10 @@ on:
     branches: [ "master", "dev" ]
   pull_request:
     branches: [ "master", "dev" ]
-
+defaults:
+  run: 
+    working-directory: API
+    
 jobs:
   build:
 

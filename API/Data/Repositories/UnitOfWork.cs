@@ -2,6 +2,7 @@ using AutoMapper;
 using JPS.Data;
 using JPS.Data.Repositories;
 using JPS.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 using PublishWell.API.Interfaces;
 
 namespace PublishWell.API.Data.Repositories
@@ -19,25 +20,27 @@ namespace PublishWell.API.Data.Repositories
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _http;
-
+        private readonly IDistributedCache _cache;
         /// <summary>
         /// Injecting the repository into the unit of work constructor.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="mapper"></param>
         /// <param name="http"></param>
-        public UnitOfWork(DataContext context, IMapper mapper, IHttpContextAccessor http)
+        /// <param name="cache"></param>
+        public UnitOfWork(DataContext context, IMapper mapper, IHttpContextAccessor http, IDistributedCache cache)
         {
             _context = context;
             _mapper = mapper;
             _http = http;
+            _cache = cache;
         }
 
         /// <summary>
         /// Provides access to the IUserRepository instance for user-related data access operations.
         /// This instance is created with the injected DataContext and AutoMapper for potential object mapping needs.
         /// </summary>
-        public IUserRepository userRepository => new UserRepository(_context, _mapper);
+        public IUserRepository userRepository => new UserRepository(_context, _mapper, _cache);
 
         /// <summary>
         /// Provides access to the IMailRepository instance for mail template-related data access operations.
@@ -56,7 +59,7 @@ namespace PublishWell.API.Data.Repositories
         ///  Provides access to the IPublicationsRepository instance.
         /// </summary>
         /// <returns>publicationsRepository object</returns>
-        public IPublicationsRepository publicationsRepository => new PublicationRepository(_context, _mapper, _http);
+        public IPublicationsRepository publicationsRepository => new PublicationRepository(_context, _mapper, _http, _cache);
 
         /// <summary>
         /// Commits all changes made through the repositories exposed by this UnitOfWork instance

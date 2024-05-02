@@ -64,6 +64,13 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
+// Adding redis caching 
+builder.Services.AddStackExchangeRedisCache(o=>{
+    o.Configuration = builder.Configuration.GetConnectionString("Redis");
+    o.InstanceName = "Publishwell_";
+});
+
+
 var app = builder.Build();
 //Adding exception Middleware
 app.UseMiddleware<ExceptionMiddleware>();

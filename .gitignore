@@ -46,8 +46,9 @@ _ReSharper*/
 ~$*
 
 # Custom
-/bin
-/obj
-JPS.db
-JPS.db-shm
-JPS.db-wal
+API/bin
+API/obj
+API/JPS.db
+API/JPS.db-shm
+API/JPS.db-wal
+UI/.vscode
